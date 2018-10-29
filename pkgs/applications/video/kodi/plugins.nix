@@ -1,6 +1,7 @@
 { stdenv, callPackage, fetchurl, fetchFromGitHub, unzip
 , cmake, kodiPlain, libcec_platform, tinyxml
-, steam, libusb, pcre-cpp, jsoncpp, libhdhomerun, zlib }:
+, steam, libusb, pcre-cpp, jsoncpp, libhdhomerun, zlib
+, expat, glib, nspr, nss }:
 
 with stdenv.lib;
 
@@ -63,7 +64,8 @@ let self = rec {
     '';
   } // args));
 
-  mkKodiABIPlugin = { plugin, namespace, version, extraBuildInputs ? [], ... }@args:
+  mkKodiABIPlugin = { plugin, namespace, version, extraBuildInputs ? [],
+    extraRuntimeDependencies ? [], extraInstallPhase ? "", ... }@args:
   toKodiPlugin (stdenv.mkDerivation (rec {
     name = "kodi-plugin-${plugin}-${version}";
 
@@ -83,6 +85,7 @@ let self = rec {
     installPhase = let n = namespace; in ''
       make install
       ln -s $out/lib/addons/${n}/${n}.so.${version} $out${pluginDir}/${n}/${n}.so.${version}
+      ${extraInstallPhase}
     '';
   } // args));
 
@@ -440,6 +443,35 @@ let self = rec {
       platforms = platforms.all;
       maintainers = with maintainers; [ worldofpeace ];
       license = licenses.cc-by-nc-sa-30;
+    };
+  };
+
+  inputstream-adaptive = mkKodiABIPlugin rec {
+
+    plugin = "inputstream-adaptive";
+    namespace = "inputstream.adaptive";
+    version = "2.3.3";
+
+    src = fetchFromGitHub {
+      owner = "peak3d";
+      repo = "inputstream.adaptive";
+      rev = "${version}";
+      sha256 = "0swva6fidjv4jz3awiy3nm8ypw7pjp371cwm6ziv6qym54xx3a3i";
+    };
+
+    extraBuildInputs = [ expat ];
+
+    extraRuntimeDependencies = [ glib nspr nss stdenv.cc.cc.lib ];
+
+    extraInstallPhase = let n = namespace; in ''
+      ln -s $out/lib/addons/${n}/libssd_wv.so $out/${pluginDir}/${n}/libssd_wv.so
+    '';
+
+    meta = {
+      homepage = https://github.com/peak3d/inputstream.adaptive;
+      description = "Kodi inputstream addon for several manifest types";
+      platforms = platforms.all;
+      maintainers = with maintainers; [ sephalon ];
     };
   };
 
