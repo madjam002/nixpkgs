@@ -45,14 +45,14 @@ assert vdpauSupport -> libvdpau != null;
 
 let
   kodiReleaseDate = "20181002";
-  kodiVersion = "18.0b4";
+  kodiVersion = "18.0rc5.2-1207";
   rel = "Leia";
 
   kodi_src = fetchFromGitHub {
     owner  = "xbmc";
     repo   = "xbmc";
-    rev    = "${kodiVersion}-${rel}";
-    sha256 = "03zm2vw0jnnklf54z1wcmf9dyf877mhsamsvdpsz88jgi75wds1z";
+    rev    = "3aac935a7e712e7a303763c649351d1569241cae";
+    sha256 = "191l6894dyr4aj6d3hrg0qj1jmf57n91ls7wvqsg3fyj3kmhnvgn";
   };
 
   kodiDependency = { name, version, rev, sha256, ... } @attrs:
